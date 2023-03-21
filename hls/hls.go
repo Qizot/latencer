@@ -19,9 +19,14 @@ var HlsCmd = &cobra.Command{
 	Long:  "Measure latency of hls protocol",
 	Run: func(cmd *cobra.Command, args []string) {
 		downloader := NewDownloader(src)
-		traceWriter := TraceWriter{}
+		traceWriter := NewTraceWriter()
 
 		defer func() {
+			if len(traceWriter.Entries) == 0 {
+				return
+			}
+
+			traceWriter.CalculateSummaries()
 			if payload, err := traceWriter.Serialize(); err == nil {
 				err := os.WriteFile(output, payload, 0644)
 				if err != nil {
